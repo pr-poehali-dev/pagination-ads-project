@@ -20,20 +20,29 @@ interface Announcement {
   socials: string;
   text: string;
   userEmail: string;
+  createdAt: string;
+  likes: number;
 }
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 20;
+const MAX_ANNOUNCEMENTS = 200;
+
+const generateMockDate = (daysAgo: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString();
+};
 
 const mockAnnouncements: Announcement[] = [
-  { id: 1, name: "Александра", age: "24", city: "Москва", email: "alex@example.com", socials: "@alex_in_msk", text: "Ищу единомышленников для совместных прогулок по городу и посещения культурных мероприятий!", userEmail: "alex@example.com" },
-  { id: 2, name: "Дмитрий", age: "27", city: "Санкт-Петербург", email: "dmitry@example.com", socials: "@dmitry_spb", text: "Предлагаю услуги репетитора по математике. Опыт работы 5 лет.", userEmail: "dmitry@example.com" },
-  { id: 3, name: "Екатерина", age: "22", city: "Казань", email: "kate@example.com", socials: "@kate_kzn", text: "Ищу компанию для занятий йогой по выходным. Начинающие приветствуются!", userEmail: "kate@example.com" },
-  { id: 4, name: "Максим", age: "29", city: "Новосибирск", email: "max@example.com", socials: "@max_nsk", text: "Отдам котят в добрые руки. 2 месяца, приучены к лотку.", userEmail: "max@example.com" },
-  { id: 5, name: "Анна", age: "25", city: "Екатеринбург", email: "anna@example.com", socials: "@anna_ekb", text: "Организую книжный клуб. Встречи каждую субботу в кафе.", userEmail: "anna@example.com" },
-  { id: 6, name: "Иван", age: "26", city: "Нижний Новгород", email: "ivan@example.com", socials: "@ivan_nn", text: "Ищу партнера для игры в теннис. Уровень средний.", userEmail: "ivan@example.com" },
-  { id: 7, name: "Мария", age: "23", city: "Краснодар", email: "maria@example.com", socials: "@maria_krd", text: "Продаю handmade украшения. Уникальные авторские работы!", userEmail: "maria@example.com" },
-  { id: 8, name: "Артём", age: "28", city: "Владивосток", email: "artem@example.com", socials: "@artem_vvo", text: "Ищу соседа по квартире. Район центральный, все удобства.", userEmail: "artem@example.com" },
-  { id: 9, name: "София", age: "24", city: "Уфа", email: "sofia@example.com", socials: "@sofia_ufa", text: "Набираю группу на курсы английского языка. Начало в следующем месяце.", userEmail: "sofia@example.com" },
+  { id: 1, name: "Александра", age: "24", city: "Москва", email: "alex@example.com", socials: "@alex_in_msk", text: "Ищу единомышленников для совместных прогулок по городу и посещения культурных мероприятий!", userEmail: "alex@example.com", createdAt: generateMockDate(0), likes: 12 },
+  { id: 2, name: "Дмитрий", age: "27", city: "Санкт-Петербург", email: "dmitry@example.com", socials: "@dmitry_spb", text: "Предлагаю услуги репетитора по математике. Опыт работы 5 лет.", userEmail: "dmitry@example.com", createdAt: generateMockDate(1), likes: 8 },
+  { id: 3, name: "Екатерина", age: "22", city: "Казань", email: "kate@example.com", socials: "@kate_kzn", text: "Ищу компанию для занятий йогой по выходным. Начинающие приветствуются!", userEmail: "kate@example.com", createdAt: generateMockDate(2), likes: 15 },
+  { id: 4, name: "Максим", age: "29", city: "Новосибирск", email: "max@example.com", socials: "@max_nsk", text: "Отдам котят в добрые руки. 2 месяца, приучены к лотку.", userEmail: "max@example.com", createdAt: generateMockDate(3), likes: 24 },
+  { id: 5, name: "Анна", age: "25", city: "Екатеринбург", email: "anna@example.com", socials: "@anna_ekb", text: "Организую книжный клуб. Встречи каждую субботу в кафе.", userEmail: "anna@example.com", createdAt: generateMockDate(4), likes: 6 },
+  { id: 6, name: "Иван", age: "26", city: "Нижний Новгород", email: "ivan@example.com", socials: "@ivan_nn", text: "Ищу партнера для игры в теннис. Уровень средний.", userEmail: "ivan@example.com", createdAt: generateMockDate(5), likes: 3 },
+  { id: 7, name: "Мария", age: "23", city: "Краснодар", email: "maria@example.com", socials: "@maria_krd", text: "Продаю handmade украшения. Уникальные авторские работы!", userEmail: "maria@example.com", createdAt: generateMockDate(6), likes: 19 },
+  { id: 8, name: "Артём", age: "28", city: "Владивосток", email: "artem@example.com", socials: "@artem_vvo", text: "Ищу соседа по квартире. Район центральный, все удобства.", userEmail: "artem@example.com", createdAt: generateMockDate(7), likes: 5 },
+  { id: 9, name: "София", age: "24", city: "Уфа", email: "sofia@example.com", socials: "@sofia_ufa", text: "Набираю группу на курсы английского языка. Начало в следующем месяце.", userEmail: "sofia@example.com", createdAt: generateMockDate(8), likes: 11 },
 ];
 
 const Index = () => {
@@ -43,10 +52,20 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [likedAnnouncements, setLikedAnnouncements] = useState<Set<number>>(new Set());
+  const [userIp, setUserIp] = useState<string>("");
 
   useEffect(() => {
     const adminStatus = localStorage.getItem("isAdmin") === "true";
     setIsAdmin(adminStatus);
+    
+    const storedLikes = localStorage.getItem("likedAnnouncements");
+    if (storedLikes) {
+      setLikedAnnouncements(new Set(JSON.parse(storedLikes)));
+    }
+    
+    const mockIp = "192.168.1." + Math.floor(Math.random() * 255);
+    setUserIp(mockIp);
   }, []);
 
   const handleLogout = () => {
@@ -78,7 +97,7 @@ const Index = () => {
     }
 
     const newAnnouncement: Announcement = {
-      id: announcements.length + 1,
+      id: Date.now(),
       name: formData.name,
       age: formData.age,
       city: formData.city,
@@ -86,9 +105,18 @@ const Index = () => {
       socials: formData.socials,
       text: formData.text,
       userEmail: formData.email,
+      createdAt: new Date().toISOString(),
+      likes: 0,
     };
 
-    setAnnouncements([newAnnouncement, ...announcements]);
+    let updatedAnnouncements = [newAnnouncement, ...announcements];
+    
+    if (updatedAnnouncements.length > MAX_ANNOUNCEMENTS) {
+      updatedAnnouncements = updatedAnnouncements.slice(0, MAX_ANNOUNCEMENTS);
+      toast.info("Старые объявления удалены автоматически");
+    }
+
+    setAnnouncements(updatedAnnouncements);
     setCurrentUserEmail(formData.email);
     setFormData({ name: "", age: "", city: "", email: "", socials: "", text: "", captcha: "" });
     setDialogOpen(false);
@@ -106,6 +134,41 @@ const Index = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLike = (id: number) => {
+    if (likedAnnouncements.has(id)) {
+      toast.error("Вы уже поставили лайк этому объявлению!");
+      return;
+    }
+
+    setAnnouncements(announcements.map(announcement => 
+      announcement.id === id 
+        ? { ...announcement, likes: announcement.likes + 1 }
+        : announcement
+    ));
+
+    const newLikedSet = new Set(likedAnnouncements);
+    newLikedSet.add(id);
+    setLikedAnnouncements(newLikedSet);
+    localStorage.setItem("likedAnnouncements", JSON.stringify(Array.from(newLikedSet)));
+    toast.success("Лайк поставлен!");
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "только что";
+    if (diffMins < 60) return `${diffMins} мин. назад`;
+    if (diffHours < 24) return `${diffHours} ч. назад`;
+    if (diffDays < 7) return `${diffDays} д. назад`;
+    
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
@@ -342,8 +405,34 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-border">
+                <div className="pt-4 border-t border-border mb-4">
                   <p className="text-sm text-foreground/80 leading-relaxed">{announcement.text}</p>
+                </div>
+                
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Icon name="Clock" size={14} className="text-muted-foreground" />
+                    <span>{formatDate(announcement.createdAt)}</span>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleLike(announcement.id)}
+                    className={`flex items-center gap-2 h-8 px-3 ${
+                      likedAnnouncements.has(announcement.id) 
+                        ? 'text-red-500 hover:text-red-600' 
+                        : 'text-muted-foreground hover:text-red-500'
+                    }`}
+                    disabled={likedAnnouncements.has(announcement.id)}
+                  >
+                    <Icon 
+                      name="Heart" 
+                      size={16} 
+                      className={likedAnnouncements.has(announcement.id) ? 'fill-current' : ''} 
+                    />
+                    <span className="font-semibold text-sm">{announcement.likes}</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
