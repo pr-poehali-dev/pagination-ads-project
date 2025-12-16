@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import Icon from "@/components/ui/icon";
 
@@ -37,11 +37,24 @@ const mockAnnouncements: Announcement[] = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+
+  useEffect(() => {
+    const adminStatus = localStorage.getItem("isAdmin") === "true";
+    setIsAdmin(adminStatus);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAdmin");
+    setIsAdmin(false);
+    toast.success("Выход выполнен");
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     age: "",
@@ -109,32 +122,47 @@ const Index = () => {
               </h1>
             </div>
 
-            <div className="flex items-center gap-6">
-              <nav className="hidden md:flex items-center gap-6">
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Главная</a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Категории</a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">О проекте</a>
-                <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Контакты</a>
-              </nav>
-              
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50">
-                <Label htmlFor="admin-mode" className="text-xs font-medium cursor-pointer">Админ</Label>
-                <Switch 
-                  id="admin-mode"
-                  checked={isAdmin} 
-                  onCheckedChange={setIsAdmin}
-                  className="data-[state=checked]:bg-primary"
-                />
-              </div>
-            </div>
+            <nav className="hidden md:flex items-center gap-6">
+              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Главная</a>
+              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Категории</a>
+              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">О проекте</a>
+              <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Контакты</a>
+              {isAdmin && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                  <Icon name="Shield" size={14} className="text-primary" />
+                  <span className="text-xs font-semibold text-primary">Администратор</span>
+                </div>
+              )}
+            </nav>
 
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="gradient-primary text-white hover:opacity-90 transition-opacity shadow-lg shadow-primary/25">
-                  <Icon name="Plus" size={18} className="mr-2" />
-                  Добавить объявление
+            <div className="flex items-center gap-3">
+              {isAdmin ? (
+                <Button 
+                  variant="outline" 
+                  onClick={handleLogout}
+                  className="border-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                >
+                  <Icon name="LogOut" size={18} className="mr-2" />
+                  Выйти
                 </Button>
-              </DialogTrigger>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate("/admin")}
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <Icon name="Shield" size={18} className="mr-2" />
+                  Админ
+                </Button>
+              )}
+              
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gradient-primary text-white hover:opacity-90 transition-opacity shadow-lg shadow-primary/25">
+                    <Icon name="Plus" size={18} className="mr-2" />
+                    Добавить объявление
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle className="text-2xl">Новое объявление</DialogTitle>
@@ -233,7 +261,8 @@ const Index = () => {
                   </Button>
                 </form>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
         </div>
       </header>
