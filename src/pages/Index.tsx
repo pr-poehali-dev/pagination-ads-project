@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -22,7 +23,33 @@ interface Announcement {
   userEmail: string;
   createdAt: string;
   likes: number;
+  photo?: string;
 }
+
+const RUSSIAN_CITIES = [
+  "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань",
+  "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону",
+  "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград",
+  "Краснодар", "Саратов", "Тюмень", "Тольятти", "Ижевск",
+  "Барнаул", "Ульяновск", "Иркутск", "Хабаровск", "Владивосток",
+  "Ярославль", "Махачкала", "Томск", "Оренбург", "Кемерово"
+];
+
+const generateCaptcha = () => {
+  const operations = [
+    { q: "5 + 7", a: "12" },
+    { q: "10 - 3", a: "7" },
+    { q: "6 × 4", a: "24" },
+    { q: "8 + 9", a: "17" },
+    { q: "15 - 6", a: "9" },
+    { q: "7 × 3", a: "21" },
+    { q: "12 + 8", a: "20" },
+    { q: "20 - 11", a: "9" },
+    { q: "9 × 2", a: "18" },
+    { q: "6 + 8", a: "14" },
+  ];
+  return operations[Math.floor(Math.random() * operations.length)];
+};
 
 const ITEMS_PER_PAGE = 20;
 const MAX_ANNOUNCEMENTS = 200;
@@ -43,6 +70,18 @@ const mockAnnouncements: Announcement[] = [
   { id: 7, name: "Мария", age: "23", city: "Краснодар", email: "maria@example.com", socials: "@maria_krd", text: "Продаю handmade украшения. Уникальные авторские работы!", userEmail: "maria@example.com", createdAt: generateMockDate(6), likes: 19 },
   { id: 8, name: "Артём", age: "28", city: "Владивосток", email: "artem@example.com", socials: "@artem_vvo", text: "Ищу соседа по квартире. Район центральный, все удобства.", userEmail: "artem@example.com", createdAt: generateMockDate(7), likes: 5 },
   { id: 9, name: "София", age: "24", city: "Уфа", email: "sofia@example.com", socials: "@sofia_ufa", text: "Набираю группу на курсы английского языка. Начало в следующем месяце.", userEmail: "sofia@example.com", createdAt: generateMockDate(8), likes: 11 },
+  { id: 10, name: "Олег", age: "30", city: "Челябинск", email: "oleg@example.com", socials: "@oleg_chel", text: "Предлагаю услуги фотографа для свадеб и мероприятий.", userEmail: "oleg@example.com", createdAt: generateMockDate(9), likes: 7 },
+  { id: 11, name: "Полина", age: "21", city: "Самара", email: "polina@example.com", socials: "@polina_smr", text: "Ищу попутчиков для путешествия по Золотому кольцу.", userEmail: "polina@example.com", createdAt: generateMockDate(10), likes: 14 },
+  { id: 12, name: "Сергей", age: "35", city: "Омск", email: "sergey@example.com", socials: "@sergey_omsk", text: "Продаю велосипед в отличном состоянии. Цена договорная.", userEmail: "sergey@example.com", createdAt: generateMockDate(11), likes: 9 },
+  { id: 13, name: "Виктория", age: "26", city: "Ростов-на-Дону", email: "vika@example.com", socials: "@vika_rnd", text: "Набираю учеников на курсы рисования маслом.", userEmail: "vika@example.com", createdAt: generateMockDate(12), likes: 18 },
+  { id: 14, name: "Алексей", age: "32", city: "Красноярск", email: "alex2@example.com", socials: "@alex_krsk", text: "Ищу напарника для открытия кофейни в центре города.", userEmail: "alex2@example.com", createdAt: generateMockDate(13), likes: 22 },
+  { id: 15, name: "Дарья", age: "23", city: "Воронеж", email: "darya@example.com", socials: "@darya_vrn", text: "Организую вечера настольных игр. Присоединяйтесь!", userEmail: "darya@example.com", createdAt: generateMockDate(14), likes: 13 },
+  { id: 16, name: "Николай", age: "29", city: "Пермь", email: "nikolay@example.com", socials: "@nikolay_prm", text: "Ищу команду для участия в марафоне.", userEmail: "nikolay@example.com", createdAt: generateMockDate(15), likes: 10 },
+  { id: 17, name: "Елена", age: "27", city: "Волгоград", email: "elena@example.com", socials: "@elena_vlg", text: "Предлагаю услуги визажиста. Опыт более 7 лет.", userEmail: "elena@example.com", createdAt: generateMockDate(16), likes: 16 },
+  { id: 18, name: "Кирилл", age: "25", city: "Саратов", email: "kirill@example.com", socials: "@kirill_srt", text: "Ищу соавтора для написания книги о путешествиях.", userEmail: "kirill@example.com", createdAt: generateMockDate(17), likes: 4 },
+  { id: 19, name: "Татьяна", age: "31", city: "Тюмень", email: "tatyana@example.com", socials: "@tatyana_tmn", text: "Провожу мастер-классы по изготовлению мыла ручной работы.", userEmail: "tatyana@example.com", createdAt: generateMockDate(18), likes: 20 },
+  { id: 20, name: "Владимир", age: "34", city: "Тольятти", email: "vladimir@example.com", socials: "@vladimir_tlt", text: "Ищу партнеров для игры в волейбол по выходным.", userEmail: "vladimir@example.com", createdAt: generateMockDate(19), likes: 8 },
+  { id: 21, name: "Ольга", age: "28", city: "Ижевск", email: "olga@example.com", socials: "@olga_izh", text: "Набираю группу для изучения испанского языка.", userEmail: "olga@example.com", createdAt: generateMockDate(20), likes: 12 },
 ];
 
 const Index = () => {
@@ -82,7 +121,11 @@ const Index = () => {
     socials: "",
     text: "",
     captcha: "",
+    photo: "",
   });
+
+  const [currentCaptcha, setCurrentCaptcha] = useState(generateCaptcha());
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -91,8 +134,8 @@ const Index = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.captcha !== "42") {
-      toast.error("Неверная капча! Подсказка: 6 × 7 = ?");
+    if (formData.captcha !== currentCaptcha.a) {
+      toast.error(`Неверная капча! Попробуйте ещё раз.`);
       return;
     }
 
@@ -107,6 +150,7 @@ const Index = () => {
       userEmail: formData.email,
       createdAt: new Date().toISOString(),
       likes: 0,
+      photo: formData.photo || undefined,
     };
 
     let updatedAnnouncements = [newAnnouncement, ...announcements];
@@ -118,7 +162,9 @@ const Index = () => {
 
     setAnnouncements(updatedAnnouncements);
     setCurrentUserEmail(formData.email);
-    setFormData({ name: "", age: "", city: "", email: "", socials: "", text: "", captcha: "" });
+    setFormData({ name: "", age: "", city: "", email: "", socials: "", text: "", captcha: "", photo: "" });
+    setPhotoPreview(null);
+    setCurrentCaptcha(generateCaptcha());
     setDialogOpen(false);
     toast.success("Объявление успешно добавлено!");
   };
@@ -134,6 +180,29 @@ const Index = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Размер файла не должен превышать 5 МБ");
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setFormData(prev => ({ ...prev, photo: result }));
+        setPhotoPreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData(prev => ({ ...prev, photo: "" }));
+    setPhotoPreview(null);
   };
 
   const handleLike = (id: number) => {
@@ -258,14 +327,18 @@ const Index = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="city">Город</Label>
-                    <Input
-                      id="city"
-                      required
-                      value={formData.city}
-                      onChange={(e) => handleInputChange("city", e.target.value)}
-                      placeholder="Ваш город"
-                      className="border-2 focus:border-primary"
-                    />
+                    <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)} required>
+                      <SelectTrigger className="border-2 focus:border-primary">
+                        <SelectValue placeholder="Выберите город" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {RUSSIAN_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -308,7 +381,44 @@ const Index = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="captcha">Капча: Сколько будет 6 × 7?</Label>
+                    <Label htmlFor="photo">Фото (необязательно)</Label>
+                    {photoPreview ? (
+                      <div className="relative">
+                        <img 
+                          src={photoPreview} 
+                          alt="Предпросмотр" 
+                          className="w-full h-40 object-cover rounded-lg border-2 border-border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8"
+                          onClick={handleRemovePhoto}
+                        >
+                          <Icon name="X" size={16} />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                        <input
+                          id="photo"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                        <Label htmlFor="photo" className="cursor-pointer flex flex-col items-center gap-2">
+                          <Icon name="Upload" size={32} className="text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Нажмите для загрузки фото</span>
+                          <span className="text-xs text-muted-foreground">До 5 МБ</span>
+                        </Label>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="captcha">Капча: Сколько будет {currentCaptcha.q}?</Label>
                     <Input
                       id="captcha"
                       required
@@ -348,9 +458,17 @@ const Index = () => {
               <div className="h-2 gradient-primary" />
               <CardContent className="p-6">
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-14 h-14 rounded-full gradient-accent flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                    {announcement.name[0]}
-                  </div>
+                  {announcement.photo ? (
+                    <img 
+                      src={announcement.photo} 
+                      alt={announcement.name}
+                      className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full gradient-accent flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                      {announcement.name[0]}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="font-bold text-xl text-foreground">{announcement.name}</h3>
